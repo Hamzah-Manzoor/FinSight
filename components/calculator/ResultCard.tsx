@@ -9,6 +9,10 @@ interface ResultCardProps {
   inflationOn: boolean
   currency: string
   locale: string
+  // Goal mode solved values
+  mode: 'fv' | 'pmt' | 'time'
+  solvedPmt?: number | null
+  solvedMonths?: number | null
 }
 
 function StatBlock({
@@ -49,6 +53,15 @@ function StatBlock({
   )
 }
 
+function formatMonths(months: number): string {
+  if (!Number.isFinite(months)) return 'Never'
+  const totalYears = months / 12
+  const years = Math.floor(totalYears)
+  const remainingMonths = Math.round((totalYears - years) * 12)
+  if (remainingMonths === 0) return `${years}y`
+  return `${years}y ${remainingMonths}m`
+}
+
 export function ResultCard({
   finalBalance,
   totalContributed,
@@ -57,8 +70,41 @@ export function ResultCard({
   inflationOn,
   currency,
   locale,
+  mode,
+  solvedPmt,
+  solvedMonths,
 }: ResultCardProps) {
   const fmt = (v: number) => formatCurrency(v, currency, locale)
+
+  if (mode === 'pmt' && solvedPmt != null) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatBlock
+          label="Required Monthly Contribution"
+          value={solvedPmt < 0 ? 'Already funded' : fmt(solvedPmt)}
+          large
+          accent
+        />
+        <StatBlock label="Final Balance" value={fmt(inflationOn ? realBalance : finalBalance)} />
+        <StatBlock label="Total Contributed" value={fmt(totalContributed)} />
+      </div>
+    )
+  }
+
+  if (mode === 'time' && solvedMonths != null) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <StatBlock
+          label="Time to Reach Goal"
+          value={formatMonths(solvedMonths)}
+          large
+          accent
+        />
+        <StatBlock label="Final Balance" value={fmt(inflationOn ? realBalance : finalBalance)} />
+        <StatBlock label="Total Contributed" value={fmt(totalContributed)} />
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

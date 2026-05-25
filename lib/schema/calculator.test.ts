@@ -12,6 +12,7 @@ describe('calculatorSchema', () => {
     expect(result.data).toEqual({
       p: 5000, pmt: 200, r: 6, t: 25,
       freq: 12, timing: 'end', infl: 3, inflOn: true,
+      mode: 'fv', target: 500000,
     })
   })
 
