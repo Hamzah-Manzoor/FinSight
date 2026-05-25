@@ -20,8 +20,10 @@ import {
 export function useCalculatorState() {
   const [initialParams, syncToUrl] = useUrlState(calculatorSchema, defaultParams)
 
-  const form = useForm<CalculatorParams>({
-    resolver: zodResolver(calculatorSchema),
+  // Explicit third generic pins TTransformedValues to CalculatorParams,
+  // working around a type incompatibility between @hookform/resolvers and Zod v4.
+  const form = useForm<CalculatorParams, unknown, CalculatorParams>({
+    resolver: zodResolver(calculatorSchema) as never,
     defaultValues: defaultParams,
   })
 
