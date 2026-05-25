@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { CompoundCalculator } from './CompoundCalculator'
 
 export const metadata: Metadata = {
-  title: 'Compound Interest Calculator — FinSight',
+  title: 'Compound Interest Calculator',
   description:
     'See exactly how your investment grows over time. Adjust principal, monthly contributions, rate, and time horizon — results update instantly.',
 }

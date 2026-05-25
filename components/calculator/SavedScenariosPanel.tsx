@@ -58,6 +58,7 @@ export function SavedScenariosPanel({
         <div className="flex gap-2">
           <input
             className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none ring-1 ring-foreground/10 focus:ring-2 focus:ring-emerald-600"
+            aria-label="Scenario name"
             placeholder="Scenario name…"
             value={name}
             onChange={e => setName(e.target.value)}

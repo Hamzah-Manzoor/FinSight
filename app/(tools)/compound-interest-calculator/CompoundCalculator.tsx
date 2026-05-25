@@ -1,6 +1,6 @@
 'use client'
 import dynamic from 'next/dynamic'
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useCalculatorState } from '@/lib/hooks/useCalculatorState'
 import { useCurrency } from '@/lib/hooks/useCurrency'
 import { CURRENCY_LOCALES } from '@/types'
@@ -22,6 +22,12 @@ export function CompoundCalculator() {
   const { currency } = useCurrency()
   const locale = CURRENCY_LOCALES[currency]
   const [savedOpen, setSavedOpen] = useState(false)
+
+  const handleLoad = useCallback((id: string) => {
+    const loaded = savedScenarios.load(id)
+    if (loaded) form.reset(loaded)
+    setSavedOpen(false)
+  }, [savedScenarios, form])
 
   return (
     <>
@@ -70,11 +76,7 @@ export function CompoundCalculator() {
         onOpenChange={setSavedOpen}
         scenarios={savedScenarios.scenarios}
         onSave={name => savedScenarios.save(name, params)}
-        onLoad={id => {
-          const loaded = savedScenarios.load(id)
-          if (loaded) form.reset(loaded)
-          setSavedOpen(false)
-        }}
+        onLoad={handleLoad}
         onRemove={savedScenarios.remove}
       />
     </>
