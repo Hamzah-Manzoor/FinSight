@@ -1,0 +1,9 @@
+{
+  "source": "Yahoo Finance BTC-USD",
+  "license": "public",
+  "lastUpdated": "2026-05-25",
+  "dateRange": {
+    "min": "2014-10-01",
+    "max": "2026-05-01"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "source": "Yahoo Finance ^SP500TR (S&P 500 Total Return Index)",
+  "license": "public",
+  "lastUpdated": "2026-05-25",
+  "dateRange": {
+    "min": "1988-01-01",
+    "max": "2026-05-01"
+  }
+}

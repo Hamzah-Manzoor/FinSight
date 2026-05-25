@@ -1,0 +1,10 @@
+{
+  "source": "Yahoo Finance IEF (iShares 7-10Y Treasury Bond ETF) — proxy for US 10Y Treasury total return",
+  "license": "public",
+  "lastUpdated": "2026-05-25",
+  "dateRange": {
+    "min": "2002-08-01",
+    "max": "2026-05-01"
+  },
+  "note": "IEF inception 2002-07. Tracks 7-10Y US Treasuries."
+}
