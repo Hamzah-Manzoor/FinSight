@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ThemeToggle } from './ThemeToggle'
+import { CurrencySelector } from './CurrencySelector'
 
 export function Header() {
   return (
@@ -12,6 +13,7 @@ export function Header() {
           FinSight
         </Link>
         <div className="flex items-center gap-2">
+          <CurrencySelector />
           <ThemeToggle />
         </div>
       </div>
