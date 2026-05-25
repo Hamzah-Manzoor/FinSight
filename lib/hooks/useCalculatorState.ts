@@ -11,6 +11,8 @@ import { useUrlState } from './useUrlState'
 import { useSavedScenarios } from './useSavedScenarios'
 import {
   calcFV,
+  calcPMT,
+  calcTime,
   calcRealValue,
   buildYearlyBreakdown,
   type CompoundFreq,
@@ -50,17 +52,39 @@ export function useCalculatorState() {
     const freq = params.freq as CompoundFreq
     const timing = params.timing as ContributionTiming
 
-    const finalBalance = calcFV(params.p, params.pmt, annualRate, params.t, freq, timing)
-    const totalContributed = params.p + params.pmt * params.t * 12
+    // Effective PMT and years used for simulation (may be solved values in goal modes)
+    let effectivePmt = params.pmt
+    let effectiveYears = params.t
+    let solvedPmt: number | null = null
+    let solvedMonths: number | null = null
+
+    if (params.mode === 'pmt') {
+      solvedPmt = calcPMT(params.target, params.p, annualRate, params.t, freq)
+      effectivePmt = Math.max(0, solvedPmt)
+    } else if (params.mode === 'time') {
+      solvedMonths = calcTime(params.target, params.p, params.pmt, annualRate, freq)
+      effectiveYears = Math.max(1 / 12, solvedMonths / 12)
+    }
+
+    const finalBalance = calcFV(params.p, effectivePmt, annualRate, effectiveYears, freq, timing)
+    const totalContributed = params.p + effectivePmt * effectiveYears * 12
     const interestEarned = finalBalance - totalContributed
     const realBalance = params.inflOn
-      ? calcRealValue(finalBalance, inflationRate, params.t)
+      ? calcRealValue(finalBalance, inflationRate, effectiveYears)
       : finalBalance
     const yearlyRows = buildYearlyBreakdown(
-      params.p, params.pmt, annualRate, params.t, freq, timing,
+      params.p, effectivePmt, annualRate, effectiveYears, freq, timing,
     )
 
-    return { finalBalance, totalContributed, interestEarned, realBalance, yearlyRows }
+    return {
+      finalBalance,
+      totalContributed,
+      interestEarned,
+      realBalance,
+      yearlyRows,
+      solvedPmt,
+      solvedMonths,
+    }
   }, [params])
 
   const savedScenarios = useSavedScenarios()

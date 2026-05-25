@@ -12,6 +12,10 @@ export const calculatorSchema = z.object({
   infl:   z.coerce.number().min(0).default(2.5),
   // Boolean URL params — "false" string is truthy so we cannot use z.coerce.boolean()
   inflOn: z.preprocess(v => v === '1' || v === true, z.boolean()).default(false),
+  // Goal mode: which variable to solve for
+  mode:   z.enum(['fv', 'pmt', 'time']).default('fv'),
+  // Target future value used in pmt/time solve modes
+  target: z.coerce.number().min(0).default(500000),
 })
 
 export type CalculatorParams = z.infer<typeof calculatorSchema>

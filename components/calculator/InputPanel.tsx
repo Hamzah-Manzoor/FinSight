@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch'
 import { Separator } from '@/components/ui/separator'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ModeToggle, type CalcMode } from '@/components/calculator/ModeToggle'
 import type { CalculatorParams } from '@/lib/schema/calculator'
 
 interface InputPanelProps {
@@ -53,6 +54,18 @@ function NumberInput({ id, ...props }: React.InputHTMLAttributes<HTMLInputElemen
   )
 }
 
+function SolvedDisplay({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <div className="h-10 w-full rounded-lg border border-emerald-600/40 bg-emerald-50 px-3 py-2 text-sm font-semibold tabular-nums text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 ring-1 ring-emerald-600/20 flex items-center">
+        {value}
+      </div>
+      <span className="text-xs text-muted-foreground">Calculated result</span>
+    </div>
+  )
+}
+
 const FREQ_OPTIONS = [
   { value: '12', label: 'Monthly' },
   { value: '4', label: 'Quarterly' },
@@ -69,6 +82,7 @@ export function InputPanel({ form, onOpenSaved }: InputPanelProps) {
   } = form
 
   const inflationOn = watch('inflOn')
+  const mode = watch('mode') as CalcMode
   const [advancedOpen, setAdvancedOpen] = useState(false)
 
   return (
@@ -82,23 +96,52 @@ export function InputPanel({ form, onOpenSaved }: InputPanelProps) {
         </Button>
       </div>
 
+      {/* Mode toggle */}
+      <Controller
+        control={control}
+        name="mode"
+        render={({ field }) => (
+          <ModeToggle
+            value={field.value as CalcMode}
+            onChange={(m) => field.onChange(m)}
+          />
+        )}
+      />
+
       <Separator />
+
+      {/* Target amount — shown in pmt and time modes */}
+      {mode !== 'fv' && (
+        <Field label="Goal Amount" id="target" hint="The future value you want to reach" error={errors.target?.message}>
+          <NumberInput id="target" min={0} step={1000} {...register('target', { valueAsNumber: true })} />
+        </Field>
+      )}
 
       <Field label="Initial Investment" id="p" error={errors.p?.message}>
         <NumberInput id="p" min={0} step={100} {...register('p', { valueAsNumber: true })} />
       </Field>
 
-      <Field label="Monthly Contribution" id="pmt" error={errors.pmt?.message}>
-        <NumberInput id="pmt" min={0} step={50} {...register('pmt', { valueAsNumber: true })} />
-      </Field>
+      {/* Monthly Contribution — normal input in fv/time modes, solved display in pmt mode */}
+      {mode === 'pmt' ? (
+        <SolvedDisplay label="Monthly Contribution" value="← calculated below" />
+      ) : (
+        <Field label="Monthly Contribution" id="pmt" error={errors.pmt?.message}>
+          <NumberInput id="pmt" min={0} step={50} {...register('pmt', { valueAsNumber: true })} />
+        </Field>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="Annual Return (%)" id="r" hint="Negative values allowed" error={errors.r?.message}>
           <NumberInput id="r" step={0.1} {...register('r', { valueAsNumber: true })} />
         </Field>
-        <Field label="Time Period (years)" id="t" error={errors.t?.message}>
-          <NumberInput id="t" min={1} max={100} step={1} {...register('t', { valueAsNumber: true })} />
-        </Field>
+        {/* Time Period — normal input in fv/pmt modes, solved display in time mode */}
+        {mode === 'time' ? (
+          <SolvedDisplay label="Time Period (years)" value="← calculated" />
+        ) : (
+          <Field label="Time Period (years)" id="t" error={errors.t?.message}>
+            <NumberInput id="t" min={1} max={100} step={1} {...register('t', { valueAsNumber: true })} />
+          </Field>
+        )}
       </div>
 
       <Field label="Compounding Frequency" id="freq" error={errors.freq?.message}>
