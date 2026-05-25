@@ -13,6 +13,8 @@ import type { CalculatorParams } from '@/lib/schema/calculator'
 interface InputPanelProps {
   form: UseFormReturn<CalculatorParams>
   onOpenSaved: () => void
+  solvedPmt?: number | null
+  solvedMonths?: number | null
 }
 
 interface FieldProps {
@@ -54,16 +56,31 @@ function NumberInput({ id, ...props }: React.InputHTMLAttributes<HTMLInputElemen
   )
 }
 
-function SolvedDisplay({ label, value }: { label: string; value: string }) {
+function SolvedDisplay({ label, value }: { label: string; value: string | null }) {
   return (
     <div className="flex flex-col gap-1.5">
       <span className="text-sm font-medium text-muted-foreground">{label}</span>
       <div className="h-10 w-full rounded-lg border border-emerald-600/40 bg-emerald-50 px-3 py-2 text-sm font-semibold tabular-nums text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400 ring-1 ring-emerald-600/20 flex items-center">
-        {value}
+        {value ?? '—'}
       </div>
       <span className="text-xs text-muted-foreground">Calculated result</span>
     </div>
   )
+}
+
+function formatSolvedPmt(pmt: number | null | undefined): string | null {
+  if (pmt == null) return null
+  if (pmt < 0) return 'Already funded'
+  return new Intl.NumberFormat('en', { maximumFractionDigits: 2 }).format(pmt)
+}
+
+function formatSolvedMonths(months: number | null | undefined): string | null {
+  if (months == null) return null
+  if (!Number.isFinite(months)) return 'Never'
+  const years = Math.floor(months / 12)
+  const rem = Math.round(months % 12)
+  if (rem === 0) return `${years} yr`
+  return `${years} yr ${rem} mo`
 }
 
 const FREQ_OPTIONS = [
@@ -73,7 +90,7 @@ const FREQ_OPTIONS = [
   { value: '365', label: 'Daily' },
 ]
 
-export function InputPanel({ form, onOpenSaved }: InputPanelProps) {
+export function InputPanel({ form, onOpenSaved, solvedPmt, solvedMonths }: InputPanelProps) {
   const {
     register,
     control,
@@ -123,7 +140,7 @@ export function InputPanel({ form, onOpenSaved }: InputPanelProps) {
 
       {/* Monthly Contribution — normal input in fv/time modes, solved display in pmt mode */}
       {mode === 'pmt' ? (
-        <SolvedDisplay label="Monthly Contribution" value="← calculated below" />
+        <SolvedDisplay label="Monthly Contribution" value={formatSolvedPmt(solvedPmt)} />
       ) : (
         <Field label="Monthly Contribution" id="pmt" error={errors.pmt?.message}>
           <NumberInput id="pmt" min={0} step={50} {...register('pmt', { valueAsNumber: true })} />
@@ -136,7 +153,7 @@ export function InputPanel({ form, onOpenSaved }: InputPanelProps) {
         </Field>
         {/* Time Period — normal input in fv/pmt modes, solved display in time mode */}
         {mode === 'time' ? (
-          <SolvedDisplay label="Time Period (years)" value="← calculated" />
+          <SolvedDisplay label="Time Period (years)" value={formatSolvedMonths(solvedMonths)} />
         ) : (
           <Field label="Time Period (years)" id="t" error={errors.t?.message}>
             <NumberInput id="t" min={1} max={100} step={1} {...register('t', { valueAsNumber: true })} />
