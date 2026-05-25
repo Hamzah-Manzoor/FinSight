@@ -128,3 +128,20 @@
     @apply font-sans;
   }
 }
+
+/* FinSight custom additions */
+@layer base {
+  :root {
+    --color-accent: oklch(47% 0.15 145);
+    --color-accent-foreground: oklch(98% 0 0);
+  }
+
+  .dark {
+    --color-accent: oklch(65% 0.15 145);
+    --color-accent-foreground: oklch(10% 0 0);
+  }
+
+  * {
+    font-variant-numeric: tabular-nums;
+  }
+}
