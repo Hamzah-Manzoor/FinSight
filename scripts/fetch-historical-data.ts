@@ -6,6 +6,7 @@ interface DataPoint { date: string; value: number }
 const OUT = join(process.cwd(), 'public', 'data')
 
 function write(name: string, data: DataPoint[], meta: object) {
+  if (data.length === 0) throw new Error(`No data for ${name}`)
   writeFileSync(join(OUT, `${name}.json`), JSON.stringify(data, null, 2))
   writeFileSync(join(OUT, `${name}.meta.json`), JSON.stringify(meta, null, 2))
   const first = data[0].date
@@ -31,7 +32,14 @@ async function yahoo(ticker: string): Promise<DataPoint[]> {
   for (let i = 0; i < timestamps.length; i++) {
     if (closes[i] != null) points.push({ date: tsToDate(timestamps[i]), value: closes[i]! })
   }
-  return points
+  // Deduplicate: keep last value per month (latest price wins)
+  const seen = new Map<string, number>()
+  for (const p of points) {
+    seen.set(p.date, p.value)
+  }
+  return Array.from(seen.entries())
+    .map(([date, value]) => ({ date, value }))
+    .sort((a, b) => a.date.localeCompare(b.date))
 }
 
 const today = new Date().toISOString().split('T')[0]
