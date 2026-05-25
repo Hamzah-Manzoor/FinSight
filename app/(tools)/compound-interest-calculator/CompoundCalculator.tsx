@@ -59,7 +59,12 @@ export function CompoundCalculator() {
     <>
       <CalculatorShell
         inputPanel={
-          <InputPanel form={form} onOpenSaved={() => setSavedOpen(true)} />
+          <InputPanel
+            form={form}
+            onOpenSaved={() => setSavedOpen(true)}
+            solvedPmt={results.solvedPmt}
+            solvedMonths={results.solvedMonths}
+          />
         }
         resultPanel={
           <>
