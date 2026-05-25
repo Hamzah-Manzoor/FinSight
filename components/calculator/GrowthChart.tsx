@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect, useId } from 'react'
 import {
   AreaChart,
   Area,
@@ -47,20 +48,47 @@ export function GrowthChart({
   currency,
 }: GrowthChartProps) {
   const symbol = currencySymbol(currency)
+  const uid = useId().replace(/:/g, '')
 
-  const data = yearlyRows.map(row => ({
-    year: row.year,
-    principal: p,
-    contributions: Math.max(0, row.totalContributed - p),
-    interest: Math.max(0, row.interestEarned),
-    ...(inflationOn && {
-      real: calcRealValue(row.balance, inflationRate, row.year),
-    }),
-  }))
+  const data = yearlyRows.map(row => {
+    const actualBalance = Math.max(0, row.balance)
+    const totalCont = row.totalContributed
 
-  const prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (actualBalance >= totalCont) {
+      // Normal case: balance > what was invested (positive net returns)
+      return {
+        year: row.year,
+        principal: p,
+        contributions: Math.max(0, totalCont - p),
+        interest: actualBalance - totalCont,
+        ...(inflationOn && {
+          real: calcRealValue(row.balance, inflationRate, row.year),
+        }),
+      }
+    } else {
+      // Negative net return: balance less than total invested — scale bands proportionally
+      const ratio = totalCont > 0 ? actualBalance / totalCont : 0
+      return {
+        year: row.year,
+        principal: p * ratio,
+        contributions: Math.max(0, totalCont - p) * ratio,
+        interest: 0,
+        ...(inflationOn && {
+          real: calcRealValue(row.balance, inflationRate, row.year),
+        }),
+      }
+    }
+  })
+
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReducedMotion(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   return (
     <div className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10">
@@ -70,15 +98,15 @@ export function GrowthChart({
       <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
           <defs>
-            <linearGradient id="gPrincipal" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${uid}P`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#71717a" stopOpacity={0.5} />
               <stop offset="95%" stopColor="#71717a" stopOpacity={0.1} />
             </linearGradient>
-            <linearGradient id="gContributions" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${uid}C`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#059669" stopOpacity={0.4} />
               <stop offset="95%" stopColor="#059669" stopOpacity={0.1} />
             </linearGradient>
-            <linearGradient id="gInterest" x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`${uid}I`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#059669" stopOpacity={0.9} />
               <stop offset="95%" stopColor="#059669" stopOpacity={0.3} />
             </linearGradient>
@@ -97,10 +125,12 @@ export function GrowthChart({
             width={56}
           />
           <Tooltip
-            formatter={(value: number, name: string) => [
-              compactValue(value, symbol),
-              name.charAt(0).toUpperCase() + name.slice(1),
-            ]}
+            formatter={(value, name) => {
+              const v = typeof value === 'number' ? value : 0
+              const n = String(name)
+              const label = n === 'real' ? 'Real (inflation-adj.)' : n.charAt(0).toUpperCase() + n.slice(1)
+              return [compactValue(v, symbol), label]
+            }}
             labelFormatter={label => `Year ${label}`}
             contentStyle={{
               borderRadius: '8px',
@@ -113,7 +143,7 @@ export function GrowthChart({
             dataKey="principal"
             stackId="1"
             stroke="#71717a"
-            fill="url(#gPrincipal)"
+            fill={`url(#${uid}P)`}
             isAnimationActive={!prefersReducedMotion}
           />
           <Area
@@ -121,7 +151,7 @@ export function GrowthChart({
             dataKey="contributions"
             stackId="1"
             stroke="#059669"
-            fill="url(#gContributions)"
+            fill={`url(#${uid}C)`}
             isAnimationActive={!prefersReducedMotion}
           />
           <Area
@@ -129,7 +159,7 @@ export function GrowthChart({
             dataKey="interest"
             stackId="1"
             stroke="#059669"
-            fill="url(#gInterest)"
+            fill={`url(#${uid}I)`}
             isAnimationActive={!prefersReducedMotion}
           />
           {inflationOn && (

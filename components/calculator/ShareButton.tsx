@@ -5,10 +5,14 @@ import { Button } from '@/components/ui/button'
 
 export function ShareButton() {
   function handleShare() {
-    navigator.clipboard
-      .writeText(window.location.href)
-      .then(() => toast.success('Link copied!'))
-      .catch(() => toast.error('Could not copy link'))
+    try {
+      navigator.clipboard
+        .writeText(window.location.href)
+        .then(() => toast.success('Link copied!'))
+        .catch(() => toast.error('Could not copy link'))
+    } catch {
+      toast.error('Could not copy link')
+    }
   }
 
   return (

@@ -23,6 +23,7 @@ export function BreakdownTable({ rows, currency, locale }: BreakdownTableProps) 
             {['Year', 'Balance', 'Contributed', 'Interest'].map(h => (
               <th
                 key={h}
+                scope="col"
                 className="px-4 py-3 text-left font-medium text-muted-foreground"
               >
                 {h}
