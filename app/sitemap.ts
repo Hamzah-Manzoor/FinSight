@@ -5,6 +5,8 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date()
 
+  // /savings-goal-calculator is omitted: it redirects to /compound-interest-calculator.
+  // Redirect URLs in sitemaps waste crawler budget and create duplicate content signals.
   return [
     { url: `${BASE}/`, lastModified, changeFrequency: 'monthly', priority: 1.0 },
     { url: `${BASE}/compound-interest-calculator`, lastModified, changeFrequency: 'monthly', priority: 0.9 },

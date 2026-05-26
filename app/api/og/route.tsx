@@ -5,7 +5,7 @@ export const runtime = 'edge'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl
-  const title = searchParams.get('title') ?? 'FinSight — Investment Calculators'
+  const title = (searchParams.get('title') ?? 'FinSight — Investment Calculators').slice(0, 120)
 
   return new ImageResponse(
     (

@@ -95,6 +95,9 @@ export function GrowthChart({
       <h2 className="mb-4 text-sm font-medium text-muted-foreground uppercase tracking-wider">
         Growth Over Time
       </h2>
+      <p className="sr-only">
+        Chart shows investment growth over time in three stacked areas: Principal (initial investment), Contributions (monthly deposits), and Interest earned.{inflationOn ? ' A dashed line shows the inflation-adjusted real value.' : ''}
+      </p>
       <div aria-hidden="true">
         <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
