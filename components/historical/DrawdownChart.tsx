@@ -2,9 +2,8 @@
 import {
   AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, ReferenceArea, Legend,
+  ResponsiveContainer, ReferenceArea,
 } from 'recharts'
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import type { DataPoint, DrawdownPeriod } from '@/types'
 import { formatCompact } from '@/lib/format/number'
 
@@ -25,6 +24,31 @@ type Props = SingleProps | DualProps
 function yLabel(v: number) { return `$${formatCompact(v)}` }
 function xLabel(d: string) { return d.substring(0, 4) }
 
+interface TooltipPayloadEntry {
+  name: string
+  value: number
+}
+
+interface CustomTooltipProps {
+  active?: boolean
+  payload?: TooltipPayloadEntry[]
+  label?: string
+}
+
+function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
+  if (!active || !payload?.length) return null
+  return (
+    <div className="rounded border bg-background px-3 py-1.5 text-sm shadow">
+      <p className="mb-1 font-medium">{label}</p>
+      {payload.map(entry => (
+        <p key={entry.name}>
+          {entry.name}: ${formatCompact(entry.value)}
+        </p>
+      ))}
+    </div>
+  )
+}
+
 export function DrawdownChart(props: Props) {
   const noAnim =
     typeof window !== 'undefined' &&
@@ -44,8 +68,7 @@ export function DrawdownChart(props: Props) {
           <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
           <XAxis dataKey="date" tickFormatter={xLabel} interval="preserveStartEnd" tick={{ fontSize: 12 }} />
           <YAxis tickFormatter={yLabel} width={72} tick={{ fontSize: 12 }} />
-          <Tooltip formatter={(v: ValueType | undefined) => [`$${formatCompact(Number(Array.isArray(v) ? v[0] : (v ?? 0)))}`]} labelFormatter={l => String(l)} />
-          <Legend />
+          <Tooltip content={<CustomTooltip />} />
           {series.map(s => (
             <Line key={s.name} type="monotone" dataKey={s.name} stroke={s.color} dot={false} isAnimationActive={!noAnim} />
           ))}
@@ -69,7 +92,7 @@ export function DrawdownChart(props: Props) {
         <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
         <XAxis dataKey="date" tickFormatter={xLabel} interval="preserveStartEnd" tick={{ fontSize: 12 }} />
         <YAxis tickFormatter={yLabel} width={72} tick={{ fontSize: 12 }} />
-        <Tooltip formatter={(v: ValueType | undefined) => [`$${formatCompact(Number(Array.isArray(v) ? v[0] : (v ?? 0)))}`, 'Portfolio']} labelFormatter={l => String(l)} />
+        <Tooltip content={<CustomTooltip />} />
         {drawdowns.map((d, i) => (
           <ReferenceArea key={i} x1={d.startDate} x2={d.endDate} fill="hsl(var(--destructive))" fillOpacity={0.15} />
         ))}
