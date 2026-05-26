@@ -53,25 +53,31 @@ export function HistoricalSimulator() {
   const [fetchError, setFetchError] = useState<string | null>(null)
 
   useEffect(() => {
+    const controller = new AbortController()
     setLoading(true)
     setFetchError(null)
     Promise.all([
-      fetch(ASSET_DATA_FILES[asset]).then(r => r.json() as Promise<DataPoint[]>),
-      fetch(ASSET_META_FILES[asset]).then(r => r.json() as Promise<AssetMeta>),
+      fetch(ASSET_DATA_FILES[asset], { signal: controller.signal }).then(r => r.json() as Promise<DataPoint[]>),
+      fetch(ASSET_META_FILES[asset], { signal: controller.signal }).then(r => r.json() as Promise<AssetMeta>),
     ])
       .then(([d, m]) => {
         setData(d)
         setMeta(m)
         if (assetChangedRef.current) {
           assetChangedRef.current = false
-          const maxYear = parseInt(m.dateRange.max.substring(0, 4))
+          const maxYear = parseInt(m.dateRange.max.substring(0, 4), 10)
           const autoStart = `${maxYear - 30}-01-01`
           setEndDate(m.dateRange.max)
           setStartDate(autoStart >= m.dateRange.min ? autoStart : m.dateRange.min)
         }
       })
-      .catch(() => setFetchError('Failed to load asset data. Please try again.'))
+      .catch(err => {
+        if ((err as Error).name === 'AbortError') return
+        assetChangedRef.current = false
+        setFetchError('Failed to load asset data. Please try again.')
+      })
       .finally(() => setLoading(false))
+    return () => controller.abort()
   }, [asset])
 
   useEffect(() => {
