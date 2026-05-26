@@ -54,7 +54,11 @@ export function DrawdownChart(props: Props) {
   const uid = useId()
   const [noAnim, setNoAnim] = useState(false)
   useEffect(() => {
-    setNoAnim(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setNoAnim(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setNoAnim(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   if (props.mode === 'dual') {
@@ -66,17 +70,19 @@ export function DrawdownChart(props: Props) {
     })
 
     return (
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-          <XAxis dataKey="date" tickFormatter={xLabel} interval="preserveStartEnd" tick={{ fontSize: 12 }} />
-          <YAxis tickFormatter={yLabel} width={72} tick={{ fontSize: 12 }} />
-          <Tooltip content={<CustomTooltip />} />
-          {series.map(s => (
-            <Line key={s.name} type="monotone" dataKey={s.name} stroke={s.color} dot={false} isAnimationActive={!noAnim} />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
+      <div aria-hidden="true">
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+            <XAxis dataKey="date" tickFormatter={xLabel} interval="preserveStartEnd" tick={{ fontSize: 12 }} />
+            <YAxis tickFormatter={yLabel} width={72} tick={{ fontSize: 12 }} />
+            <Tooltip content={<CustomTooltip />} />
+            {series.map(s => (
+              <Line key={s.name} type="monotone" dataKey={s.name} stroke={s.color} dot={false} isAnimationActive={!noAnim} />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
     )
   }
 
@@ -84,23 +90,25 @@ export function DrawdownChart(props: Props) {
   const chartData = data.map(d => ({ date: d.date, value: d.value }))
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <AreaChart data={chartData}>
-        <defs>
-          <linearGradient id={`${uid}-grad`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="95%" stopColor={color} stopOpacity={0.05} />
-          </linearGradient>
-        </defs>
-        <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-        <XAxis dataKey="date" tickFormatter={xLabel} interval="preserveStartEnd" tick={{ fontSize: 12 }} />
-        <YAxis tickFormatter={yLabel} width={72} tick={{ fontSize: 12 }} />
-        <Tooltip content={<CustomTooltip />} />
-        {drawdowns.map((d, i) => (
-          <ReferenceArea key={i} x1={d.startDate} x2={d.endDate} fill="hsl(var(--destructive))" fillOpacity={0.15} />
-        ))}
-        <Area type="monotone" dataKey="value" stroke={color} fill={`url(#${uid}-grad)`} dot={false} isAnimationActive={!noAnim} />
-      </AreaChart>
-    </ResponsiveContainer>
+    <div aria-hidden="true">
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={chartData}>
+          <defs>
+            <linearGradient id={`${uid}-grad`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={color} stopOpacity={0.05} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+          <XAxis dataKey="date" tickFormatter={xLabel} interval="preserveStartEnd" tick={{ fontSize: 12 }} />
+          <YAxis tickFormatter={yLabel} width={72} tick={{ fontSize: 12 }} />
+          <Tooltip content={<CustomTooltip />} />
+          {drawdowns.map((d, i) => (
+            <ReferenceArea key={i} x1={d.startDate} x2={d.endDate} fill="hsl(var(--destructive))" fillOpacity={0.15} />
+          ))}
+          <Area type="monotone" dataKey="value" stroke={color} fill={`url(#${uid}-grad)`} dot={false} isAnimationActive={!noAnim} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
