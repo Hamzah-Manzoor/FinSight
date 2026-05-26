@@ -91,11 +91,12 @@ export function GrowthChart({
   }, [])
 
   return (
-    <div aria-hidden="true" className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10">
+    <div className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10">
       <h2 className="mb-4 text-sm font-medium text-muted-foreground uppercase tracking-wider">
         Growth Over Time
       </h2>
-      <ResponsiveContainer width="100%" height={280}>
+      <div aria-hidden="true">
+        <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={`${uid}P`} x1="0" y1="0" x2="0" y2="1">
@@ -187,6 +188,7 @@ export function GrowthChart({
           />
         </AreaChart>
       </ResponsiveContainer>
+      </div>
     </div>
   )
 }
