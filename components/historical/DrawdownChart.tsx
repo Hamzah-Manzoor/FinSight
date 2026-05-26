@@ -54,7 +54,11 @@ export function DrawdownChart(props: Props) {
   const uid = useId()
   const [noAnim, setNoAnim] = useState(false)
   useEffect(() => {
-    setNoAnim(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setNoAnim(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setNoAnim(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
 
   if (props.mode === 'dual') {
