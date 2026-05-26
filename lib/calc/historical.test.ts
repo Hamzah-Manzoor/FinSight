@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getDateRange, calcCAGR, calcDrawdowns, runSimulation } from './historical'
-import type { DataPoint } from '../../types'
+import type { DataPoint } from '@/types'
 
 const data: DataPoint[] = [
   { date: '2020-01-01', value: 100 },
@@ -93,5 +93,12 @@ describe('runSimulation', () => {
     ]
     const result = runSimulation(rising, '2020-01-01', '2020-03-01', 1000, 0)
     expect(result.worstDrawdown.depth).toBe(0)
+  })
+
+  it('cagr matches asset price CAGR from calcCAGR', () => {
+    const result = runSimulation(data, '2020-01-01', '2020-06-01', 1000, 0)
+    // Asset goes from 100 to 120 over 5 months = 5/12 years
+    const expected = calcCAGR(100, 120, 5 / 12)
+    expect(result.cagr).toBeCloseTo(expected, 6)
   })
 })

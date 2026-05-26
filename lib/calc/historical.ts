@@ -10,6 +10,10 @@ export function calcCAGR(startValue: number, endValue: number, years: number): n
   return Math.pow(endValue / startValue, 1 / years) - 1
 }
 
+/**
+ * Identifies drawdown periods (>5% depth) in a monthly-spaced DataPoint array.
+ * durationMonths is measured peak-to-recovery, not peak-to-trough.
+ */
 export function calcDrawdowns(data: DataPoint[]): DrawdownPeriod[] {
   if (data.length < 2) return []
 
@@ -21,6 +25,10 @@ export function calcDrawdowns(data: DataPoint[]): DrawdownPeriod[] {
 
   for (let i = 1; i < data.length; i++) {
     const v = data[i].value
+    if (peakValue <= 0) {
+      if (v > 0) { peakValue = v; peakIdx = i; troughValue = v; inDrawdown = false }
+      continue
+    }
     if (v >= peakValue) {
       if (inDrawdown) {
         const depth = (troughValue - peakValue) / peakValue
@@ -53,6 +61,10 @@ export function calcDrawdowns(data: DataPoint[]): DrawdownPeriod[] {
   return results
 }
 
+/**
+ * Runs a historical portfolio simulation. Data must be sorted ascending and monthly-spaced;
+ * duration and CAGR calculations assume one month between consecutive points.
+ */
 export function runSimulation(
   data: DataPoint[],
   startDate: string,
@@ -60,6 +72,7 @@ export function runSimulation(
   initialInvestment: number,
   monthlyContribution: number,
 ): SimulationResult {
+  // ISO-8601 YYYY-MM-DD strings sort lexicographically = chronologically
   const slice = data.filter(d => d.date >= startDate && d.date <= endDate)
   if (slice.length < 2) throw new Error('Not enough data in selected range')
 
@@ -68,6 +81,7 @@ export function runSimulation(
   const monthlyData: DataPoint[] = [{ date: slice[0].date, value: balance }]
   const yearlyRows: YearlyReturnRow[] = []
   let yearStartBalance = balance
+  let yearStartIdx = 0
 
   for (let i = 1; i < slice.length; i++) {
     const monthReturn = (slice[i].value - slice[i - 1].value) / slice[i - 1].value
@@ -81,13 +95,17 @@ export function runSimulation(
       slice[i + 1].date.substring(0, 4) !== slice[i].date.substring(0, 4)
 
     if (isYearEnd) {
+      const monthsInPeriod = i - yearStartIdx
       yearlyRows.push({
         year: currYear,
         startValue: yearStartBalance,
         endValue: balance,
-        annualReturn: (balance - yearStartBalance) / yearStartBalance,
+        annualReturn: monthsInPeriod === 12
+          ? (balance - yearStartBalance) / yearStartBalance
+          : Math.pow(balance / yearStartBalance, 12 / monthsInPeriod) - 1,
       })
       yearStartBalance = balance
+      yearStartIdx = i
     }
   }
 
@@ -102,6 +120,7 @@ export function runSimulation(
   return {
     finalValue: balance,
     totalInvested,
+    // Simple return on invested capital; overstates early contributions for multi-period DCA
     totalReturn: totalInvested > 0 ? (balance - totalInvested) / totalInvested : 0,
     cagr: calcCAGR(slice[0].value, slice[slice.length - 1].value, years),
     monthlyData,
