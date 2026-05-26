@@ -2,18 +2,35 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { TrendingUp, BarChart2, ArrowUpDown, Target } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card'
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { JsonLd } from '@/components/shared/JsonLd'
 import { cn } from '@/lib/utils'
 
+const TITLE = 'FinSight — Free Investment Calculators'
+const DESCRIPTION =
+  'Understand compound interest, explore historical returns, compare DCA vs lump sum, and plan your savings goals. Free, private, no signup.'
+
+function ogImage(title: string) {
+  return [{ url: `/api/og?title=${encodeURIComponent(title)}`, width: 1200, height: 630, alt: title }]
+}
+
 export const metadata: Metadata = {
-  title: 'FinSight — Free Investment Calculators',
-  description:
-    'Understand compound interest, explore historical returns, compare DCA vs lump sum, and plan your savings goals. Free, private, no signup.',
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    url: '/',
+    siteName: 'FinSight',
+    type: 'website',
+    images: ogImage(TITLE),
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: ogImage(TITLE).map(i => i.url),
+  },
 }
 
 const TOOLS = [
@@ -50,6 +67,19 @@ const TOOLS = [
 export default function HomePage() {
   return (
     <main>
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@type': 'WebApplication',
+          name: 'FinSight',
+          description: DESCRIPTION,
+          url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
+          applicationCategory: 'FinanceApplication',
+          operatingSystem: 'Any',
+          offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+        }}
+      />
+
       {/* Hero */}
       <section className="mx-auto max-w-6xl px-4 py-24 text-center">
         <h1 className="mb-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
