@@ -16,10 +16,11 @@ export function HistoricalResultCard({ result }: Props) {
   return (
     <Card>
       <CardContent className="pt-6">
-        <p className="text-sm text-muted-foreground mb-1">
-          You invested {fmt(result.totalInvested)} and ended up with
-        </p>
-        <p className="text-4xl font-bold tabular-nums">{fmt(result.finalValue)}</p>
+        <div className="flex flex-wrap items-baseline gap-3">
+          <span className="text-sm text-muted-foreground">You invested {fmt(result.totalInvested)}</span>
+          <span className="text-muted-foreground">→</span>
+          <span className="text-4xl font-bold tabular-nums">{fmt(result.finalValue)}</span>
+        </div>
         <div className="mt-4 flex flex-wrap gap-x-8 gap-y-2 text-sm">
           <span>
             <span className="text-muted-foreground">Total return </span>

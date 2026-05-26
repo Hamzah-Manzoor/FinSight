@@ -46,10 +46,10 @@ export function WinRateHistogram({ analysis }: Props) {
                 key={i}
                 fill={
                   entry.winner === 'lumpSum'
-                    ? 'hsl(var(--chart-2))'
+                    ? '#22c55e'
                     : entry.winner === 'dca'
-                    ? 'hsl(var(--chart-1))'
-                    : 'hsl(var(--muted-foreground))'
+                    ? '#3b82f6'
+                    : '#9ca3af'
                 }
                 fillOpacity={0.8}
               />
@@ -59,11 +59,11 @@ export function WinRateHistogram({ analysis }: Props) {
       </ResponsiveContainer>
       <div className="flex gap-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded-sm bg-[hsl(var(--chart-2))]" />
+          <span className="inline-block h-3 w-3 rounded-sm" style={{ background: '#22c55e' }} />
           Lump sum wins
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-3 w-3 rounded-sm bg-[hsl(var(--chart-1))]" />
+          <span className="inline-block h-3 w-3 rounded-sm" style={{ background: '#3b82f6' }} />
           DCA wins
         </span>
       </div>

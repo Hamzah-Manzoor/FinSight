@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useCurrency } from '@/lib/hooks/useCurrency'
@@ -11,6 +11,9 @@ interface Props { rows: YearlyReturnRow[] }
 
 export function YearlyReturnsTable({ rows }: Props) {
   const [open, setOpen] = useState(false)
+  useEffect(() => {
+    if (window.innerWidth >= 768) setOpen(true)
+  }, [])
   const { currency } = useCurrency()
   const locale = CURRENCY_LOCALES[currency]
   const fmt = (v: number) => formatCurrency(v, currency, locale)
@@ -26,7 +29,7 @@ export function YearlyReturnsTable({ rows }: Props) {
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr>
-                {['Year', 'Start', 'End', 'Return'].map(h => (
+                {['Year', 'Start Value', 'End Value', 'Annual Return'].map(h => (
                   <th key={h} className={`px-4 py-2 font-medium ${h === 'Year' ? 'text-left' : 'text-right'}`}>{h}</th>
                 ))}
               </tr>
