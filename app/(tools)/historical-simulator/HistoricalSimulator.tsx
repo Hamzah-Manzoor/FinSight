@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { z } from 'zod'
 import { Card, CardContent } from '@/components/ui/card'
 import { AssetPicker } from '@/components/historical/AssetPicker'
@@ -13,12 +13,15 @@ import { runSimulation } from '@/lib/calc/historical'
 import { useUrlState } from '@/lib/hooks/useUrlState'
 import { type AssetKey, ASSET_DATA_FILES, ASSET_META_FILES, type DataPoint, type AssetMeta } from '@/types'
 
-const DEFAULT_START = '1994-01-01'
+function defaultStart(): string {
+  return `${new Date().getFullYear() - 30}-01-01`
+}
+
 const DEFAULT_END = '2024-01-01'
 
 const schema = z.object({
   asset: z.enum(['sp500', 'bitcoin', 'gold', 'treasury10y']).default('sp500'),
-  start: z.string().default(DEFAULT_START),
+  start: z.string().default(defaultStart()),
   end: z.string().default(DEFAULT_END),
   amount: z.coerce.number().min(0).default(10000),
   pmt: z.coerce.number().min(0).default(0),
@@ -42,6 +45,8 @@ export function HistoricalSimulator() {
     setPmt(urlState.pmt)
   }, [JSON.stringify(urlState)]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const assetChangedRef = useRef(false)
+
   const [data, setData] = useState<DataPoint[] | null>(null)
   const [meta, setMeta] = useState<AssetMeta | null>(null)
   const [loading, setLoading] = useState(true)
@@ -54,7 +59,17 @@ export function HistoricalSimulator() {
       fetch(ASSET_DATA_FILES[asset]).then(r => r.json() as Promise<DataPoint[]>),
       fetch(ASSET_META_FILES[asset]).then(r => r.json() as Promise<AssetMeta>),
     ])
-      .then(([d, m]) => { setData(d); setMeta(m) })
+      .then(([d, m]) => {
+        setData(d)
+        setMeta(m)
+        if (assetChangedRef.current) {
+          assetChangedRef.current = false
+          const maxYear = parseInt(m.dateRange.max.substring(0, 4))
+          const autoStart = `${maxYear - 30}-01-01`
+          setEndDate(m.dateRange.max)
+          setStartDate(autoStart >= m.dateRange.min ? autoStart : m.dateRange.min)
+        }
+      })
       .catch(() => setFetchError('Failed to load asset data. Please try again.'))
       .finally(() => setLoading(false))
   }, [asset])
@@ -72,9 +87,8 @@ export function HistoricalSimulator() {
   const dateRange = meta?.dateRange ?? { min: '1988-01-01', max: DEFAULT_END }
 
   function handleAssetChange(a: AssetKey) {
+    assetChangedRef.current = true
     setAsset(a)
-    setStartDate(DEFAULT_START)
-    setEndDate(DEFAULT_END)
   }
 
   return (
