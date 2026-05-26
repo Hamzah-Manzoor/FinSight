@@ -12,7 +12,11 @@ interface Props { rows: YearlyReturnRow[] }
 export function YearlyReturnsTable({ rows }: Props) {
   const [open, setOpen] = useState(false)
   useEffect(() => {
-    if (window.innerWidth >= 768) setOpen(true)
+    const mq = window.matchMedia('(min-width: 768px)')
+    setOpen(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setOpen(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
   }, [])
   const { currency } = useCurrency()
   const locale = CURRENCY_LOCALES[currency]

@@ -32,7 +32,7 @@ export function WinRateHistogram({ analysis }: Props) {
           <YAxis tickFormatter={v => `$${formatCompact(Math.abs(v as number))}`} tick={{ fontSize: 11 }} />
           <Tooltip
             formatter={(v: unknown) => {
-              const num = typeof v === 'number' ? v : Array.isArray(v) ? (v[0] as number) : 0
+              const num = typeof v === 'number' ? v : 0
               return [
                 `$${formatCompact(Math.abs(num))}`,
                 num >= 0 ? 'Lump sum advantage' : 'DCA advantage',
@@ -41,9 +41,9 @@ export function WinRateHistogram({ analysis }: Props) {
             labelFormatter={l => `Start: ${l}`}
           />
           <Bar dataKey="diff" radius={[2, 2, 0, 0]}>
-            {chartData.map((entry, i) => (
+            {chartData.map((entry) => (
               <Cell
-                key={i}
+                key={entry.date}
                 fill={
                   entry.winner === 'lumpSum'
                     ? '#22c55e'
