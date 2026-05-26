@@ -75,6 +75,11 @@ export function DcaVsLumpSum() {
       .then(([d, m]) => {
         setData(d)
         setMeta(m)
+        // Update end date to meta's most recent data point on first load
+        // (only if user hasn't set a different end date via URL)
+        if (endDate === DEFAULT_END) {
+          setEndDate(m.dateRange.max)
+        }
         if (assetChangedRef.current) {
           assetChangedRef.current = false
           const maxYear = parseInt(m.dateRange.max.substring(0, 4), 10)
@@ -171,6 +176,12 @@ export function DcaVsLumpSum() {
 
       {loading && <p className="text-sm text-muted-foreground">Loading data…</p>}
       {fetchError && <p className="text-sm text-destructive">{fetchError}</p>}
+
+      {!loading && !fetchError && data && !comparison && (
+        <p className="text-sm text-muted-foreground">
+          No data available for the selected date range. Try adjusting the start or end date.
+        </p>
+      )}
 
       {!loading && comparison && (
         <>

@@ -25,7 +25,7 @@ export function runLumpSum(
   return {
     finalValue,
     totalInvested: totalAmount,
-    totalReturn: (finalValue - totalAmount) / totalAmount,
+    totalReturn: totalAmount > 0 ? (finalValue - totalAmount) / totalAmount : 0,
     cagr: calcCAGR(slice[0].value, slice[slice.length - 1].value, years),
     monthlyData,
   }
@@ -67,7 +67,7 @@ export function runDca(
   return {
     finalValue,
     totalInvested: totalAmount,
-    totalReturn: (finalValue - totalAmount) / totalAmount,
+    totalReturn: totalAmount > 0 ? (finalValue - totalAmount) / totalAmount : 0,
     cagr: calcCAGR(slice[0].value, slice[slice.length - 1].value, years),
     monthlyData,
   }
