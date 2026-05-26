@@ -91,7 +91,7 @@ export function GrowthChart({
   }, [])
 
   return (
-    <div className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10">
+    <div aria-hidden="true" className="rounded-xl border bg-card p-4 ring-1 ring-foreground/10">
       <h2 className="mb-4 text-sm font-medium text-muted-foreground uppercase tracking-wider">
         Growth Over Time
       </h2>
