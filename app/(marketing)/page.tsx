@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils'
 const TITLE = 'FinSight — Free Investment Calculators'
 const DESCRIPTION =
   'Understand compound interest, explore historical returns, compare DCA vs lump sum, and plan your savings goals. Free, private, no signup.'
+const PAGE_URL = '/'
 
 function ogImage(title: string) {
   return [{ url: `/api/og?title=${encodeURIComponent(title)}`, width: 1200, height: 630, alt: title }]
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
-    url: '/',
+    url: PAGE_URL,
     siteName: 'FinSight',
     type: 'website',
     images: ogImage(TITLE),
@@ -65,6 +66,7 @@ const TOOLS = [
 ]
 
 export default function HomePage() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'
   return (
     <main>
       <JsonLd
@@ -73,7 +75,7 @@ export default function HomePage() {
           '@type': 'WebApplication',
           name: 'FinSight',
           description: DESCRIPTION,
-          url: process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
+          url: `${siteUrl}${PAGE_URL}`,
           applicationCategory: 'FinanceApplication',
           operatingSystem: 'Any',
           offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
