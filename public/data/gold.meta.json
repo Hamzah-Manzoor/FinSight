@@ -1,0 +1,9 @@
+{
+  "source": "Yahoo Finance GC=F (Gold Futures)",
+  "license": "public",
+  "lastUpdated": "2026-05-25",
+  "dateRange": {
+    "min": "2000-09-01",
+    "max": "2026-05-01"
+  }
+}
