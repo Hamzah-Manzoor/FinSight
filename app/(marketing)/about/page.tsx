@@ -4,6 +4,7 @@ import { join } from 'path'
 import { JsonLd } from '@/components/shared/JsonLd'
 
 const TITLE = 'About'
+const OG_TITLE = 'About FinSight'
 const DESCRIPTION =
   'How FinSight works: compound interest formulas, historical data sources, methodology, and disclaimers.'
 const URL = '/about'
@@ -16,18 +17,18 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   openGraph: {
-    title: 'About FinSight',
+    title: OG_TITLE,
     description: DESCRIPTION,
     url: URL,
     siteName: 'FinSight',
     type: 'website',
-    images: ogImage('About FinSight'),
+    images: ogImage(OG_TITLE),
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'About FinSight',
+    title: OG_TITLE,
     description: DESCRIPTION,
-    images: ogImage('About FinSight').map(i => i.url),
+    images: ogImage(OG_TITLE).map(i => i.url),
   },
 }
 
@@ -148,16 +149,16 @@ For start-of-period contributions (annuity due):
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-muted-foreground">
-                <th className="pb-2 pr-4 font-medium">Asset</th>
-                <th className="pb-2 pr-4 font-medium">Source</th>
-                <th className="pb-2 pr-4 font-medium">Date range</th>
-                <th className="pb-2 font-medium">Updated</th>
+                <th scope="col" className="pb-2 pr-4 font-medium">Asset</th>
+                <th scope="col" className="pb-2 pr-4 font-medium">Source</th>
+                <th scope="col" className="pb-2 pr-4 font-medium">Date range</th>
+                <th scope="col" className="pb-2 font-medium">Updated</th>
               </tr>
             </thead>
             <tbody>
               {DATA_SOURCES.map((ds) => (
                 <tr key={ds.asset} className="border-b last:border-0">
-                  <td className="py-3 pr-4 font-medium">{ds.asset}</td>
+                  <th scope="row" className="py-3 pr-4 font-medium">{ds.asset}</th>
                   <td className="py-3 pr-4 text-muted-foreground">{ds.source}</td>
                   <td className="py-3 pr-4 text-muted-foreground tabular-nums">
                     {ds.dateRange.min.substring(0, 7)} –{' '}
