@@ -5,6 +5,7 @@ import { Providers } from '@/components/providers'
 import { Header } from '@/components/shared/Header'
 import { Footer } from '@/components/shared/Footer'
 import { Toaster } from '@/components/ui/sonner'
+import { Analytics } from '@vercel/analytics/next'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -44,6 +45,7 @@ export default function RootLayout({
           </div>
         </Providers>
         <Toaster richColors position="bottom-right" />
+        <Analytics />
       </body>
     </html>
   )
