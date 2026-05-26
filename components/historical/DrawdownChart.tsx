@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import {
   AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -42,7 +43,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       <p className="mb-1 font-medium">{label}</p>
       {payload.map(entry => (
         <p key={entry.name}>
-          {entry.name}: ${formatCompact(entry.value)}
+          {entry.name === 'value' ? 'Portfolio' : entry.name}: ${formatCompact(entry.value)}
         </p>
       ))}
     </div>
@@ -50,9 +51,10 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export function DrawdownChart(props: Props) {
-  const noAnim =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [noAnim, setNoAnim] = useState(false)
+  useEffect(() => {
+    setNoAnim(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  }, [])
 
   if (props.mode === 'dual') {
     const { series } = props
