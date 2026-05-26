@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useId } from 'react'
 import {
   AreaChart, Area, LineChart, Line,
   XAxis, YAxis, CartesianGrid, Tooltip,
@@ -51,6 +51,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export function DrawdownChart(props: Props) {
+  const uid = useId()
   const [noAnim, setNoAnim] = useState(false)
   useEffect(() => {
     setNoAnim(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -79,14 +80,14 @@ export function DrawdownChart(props: Props) {
     )
   }
 
-  const { data, drawdowns, color = 'hsl(var(--chart-1))' } = props as SingleProps & { data: DataPoint[]; drawdowns: DrawdownPeriod[] }
+  const { data, drawdowns, color = 'hsl(var(--chart-1))' } = props
   const chartData = data.map(d => ({ date: d.date, value: d.value }))
 
   return (
     <ResponsiveContainer width="100%" height={300}>
       <AreaChart data={chartData}>
         <defs>
-          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={`${uid}-grad`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor={color} stopOpacity={0.3} />
             <stop offset="95%" stopColor={color} stopOpacity={0.05} />
           </linearGradient>
@@ -98,7 +99,7 @@ export function DrawdownChart(props: Props) {
         {drawdowns.map((d, i) => (
           <ReferenceArea key={i} x1={d.startDate} x2={d.endDate} fill="hsl(var(--destructive))" fillOpacity={0.15} />
         ))}
-        <Area type="monotone" dataKey="value" stroke={color} fill="url(#areaGrad)" dot={false} isAnimationActive={!noAnim} />
+        <Area type="monotone" dataKey="value" stroke={color} fill={`url(#${uid}-grad)`} dot={false} isAnimationActive={!noAnim} />
       </AreaChart>
     </ResponsiveContainer>
   )
